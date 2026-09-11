@@ -61,6 +61,9 @@ import time
 import sys
 import os
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 # ── Kaggle environment detection ──
 IS_KAGGLE = os.path.exists("/kaggle/working")
 WORKING_DIR = "/kaggle/working" if IS_KAGGLE else "."

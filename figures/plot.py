@@ -11,8 +11,14 @@ Author: Ankur Chakraborty
 Date: 29 April 2026
 """
 
-import numpy as np
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import numpy as np
 from itertools import combinations
 from matplotlib.patches import Patch
 import matplotlib.gridspec as gridspec

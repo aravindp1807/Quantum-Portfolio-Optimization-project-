@@ -9,6 +9,10 @@ All numerical values locked to Phase 1 formulation.
 import numpy as np
 from itertools import combinations
 from typing import NamedTuple
+import sys
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # ============================================================
 # 2.2.1  Problem Data (exact values from Phase 1)

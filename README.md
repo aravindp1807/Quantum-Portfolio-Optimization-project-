@@ -50,3 +50,52 @@ Penalty coefficients derived from information-theoretic principles:
 | 8 | -0.612 | 0.008912 | ✓ |
 
 ## 🚀 Quick Start
+
+### Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+### Running the Pipeline
+
+Run the full pipeline end-to-end:
+```bash
+python main.py
+```
+
+Run individual phases:
+```bash
+python src/phase1_data_preparation.py
+python src/phase2_classical_baseline.py
+python src/phase3_qubo_validation.py
+python src/phase4_qaoa_optimization.py
+```
+
+Generate publication figures:
+```bash
+python figures/plot.py
+```
+
+## 📁 Repository Structure
+
+```text
+.
+├── main.py                             # Master pipeline entrypoint
+├── project-quantum-circuit.ipynb       # QAOA Execution Jupyter Notebook
+├── README.md                          # Project documentation
+├── requirements.txt                    # Python dependencies
+├── fig1_efficient_frontier.png         # Efficient Frontier plot
+├── fig2_qaoa_convergence.png          # QAOA Convergence plot
+├── fig3_solution_comparison.png       # Solution Comparison plot
+├── src/                                # Core python source files
+│   ├── main.py
+│   ├── phase1_data_preparation.py
+│   ├── phase2_classical_baseline.py
+│   ├── phase3_qubo_validation.py
+│   └── phase4_qaoa_optimization.py
+├── figures/                            # Research figure generation
+│   └── plot.py
+├── docs/                               # Methodology & analysis documentation
+└── outputs/                            # Log outputs from pipeline execution
+```

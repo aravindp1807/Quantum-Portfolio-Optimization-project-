@@ -4,6 +4,10 @@ import numpy as np
 from datetime import datetime
 from itertools import combinations
 from math import comb, log2, ceil
+import sys
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # ══════════════════════════════════════════════════════════════
 # CONFIGURATION — matches Phase 1 formulation exactly
@@ -35,14 +39,25 @@ sector_indices = {
 start = '2023-04-28'
 end   = '2026-04-28'
 
-# ══════════════════════════════════════════════════════════════
-# RAW DATA PULL
-# ══════════════════════════════════════════════════════════════
-print("Pulling data from yfinance...")
-data = yf.download(tickers, start=start, end=end, auto_adjust=True)['Close']
+import time
 
-# Reindex columns to match our ticker order (yfinance sometimes alphabetizes)
-data = data[tickers]
+print("Pulling data from yfinance...")
+data = None
+for attempt in range(5):
+    try:
+        df = yf.download(tickers, start=start, end=end, auto_adjust=True, threads=False)
+        data = df['Close'] if 'Close' in df else df
+        data = data[tickers]
+        if not data.isnull().values.any():
+            print("Successfully downloaded price data ✓")
+            break
+    except Exception as e:
+        print(f"Download attempt {attempt+1} retry due to: {e}")
+    time.sleep(1)
+
+if data is None or data.isnull().values.any():
+    print("Warning: Missing values detected after retries. Filling forward/backward...")
+    data = data.ffill().bfill()
 
 # ══════════════════════════════════════════════════════════════
 # CORE COMPUTATIONS (§1.2 – §1.4)
@@ -267,7 +282,7 @@ pd.set_option('display.float_format', '{:.6f}'.format)
 
 output_file = 'phase1_complete_data3.txt'
 
-with open(output_file, 'w') as f:
+with open(output_file, 'w', encoding='utf-8') as f:
     f.write(f"{'=' * 120}\n")
     f.write(f"PHASE 1 — COMPLETE DATA DUMP FOR PHASE 2 TRANSITION\n")
     f.write(f"Generated: {datetime.now()}\n")
