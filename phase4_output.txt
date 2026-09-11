@@ -1,0 +1,201 @@
+================================================================================
+PHASE 4 — QAOA CIRCUIT CONSTRUCTION & QUANTUM EXECUTION
+  RIT Information-Theoretic Penalty Framework
+  13-qubit Constrained Portfolio Optimization
+  Environment: Local
+  Engine: numpy-native statevector (Qiskit Sampler bypassed)
+  Objective: CVaR_0.10 (Conditional Value at Risk)
+  Optimizer: Powell × 50 restarts + INTERP warm-start
+================================================================================
+
+────────────────────────────────────────────────────────────
+STEP 0: QUBO MATRIX REBUILD & SANITY CHECK
+────────────────────────────────────────────────────────────
+
+  Q matrix: 13×13, symmetric: ✓
+  Ground state energy: -0.61562627 (expected -0.61562627)
+  |Error|: 2.85e-09 ✓
+
+────────────────────────────────────────────────────────────
+STEP 1: ISING HAMILTONIAN → SparsePauliOp
+────────────────────────────────────────────────────────────
+
+  Ising parameters:
+    E_0 = -0.37821101
+    |h| nonzero: 13
+    |J| nonzero: 78
+
+  SparsePauliOp:
+    Qubits: 13
+    Terms:  92
+
+  Hamiltonian ground-state cross-check:
+    E_Ising (manual):  -0.61562627
+    E_QUBO  (Phase 3): -0.61562627
+    |Error|: 2.85e-09 ✓
+
+────────────────────────────────────────────────────────────
+STEP 2: PATH A — EXACT EIGENSOLVER (NumPy)
+────────────────────────────────────────────────────────────
+
+  Exact ground state eigenvalue: -0.61562627
+  Expected (Phase 3):            -0.61562627
+  |Error|: 2.85e-09 ✓ MATCH
+  Time: 0.0s
+
+  → Using -0.61562627 as authoritative ground truth
+
+────────────────────────────────────────────────────────────
+STEP 3: QAOA CIRCUIT ANALYSIS
+────────────────────────────────────────────────────────────
+
+  QAOA p=1:
+    Raw depth:        27
+    Transpiled depth: 73
+    CX gates:         156
+    Total gates:      290
+    Gate breakdown:   {'cx': 156, 'rz': 91, 'h': 13, 'rx': 13, 'measure': 13, 'barrier': 4}
+
+  QAOA p=2:
+    Raw depth:        52
+    Transpiled depth: 144
+    CX gates:         312
+    Total gates:      552
+    Gate breakdown:   {'cx': 312, 'rz': 182, 'rx': 26, 'h': 13, 'measure': 13, 'barrier': 6}
+
+  QAOA p=3:
+    Raw depth:        77
+    Transpiled depth: 215
+    CX gates:         468
+    Total gates:      814
+    Gate breakdown:   {'cx': 468, 'rz': 273, 'rx': 39, 'h': 13, 'measure': 13, 'barrier': 8}
+
+  QAOA p=5:
+    Raw depth:        127
+    Transpiled depth: 357
+    CX gates:         780
+    Total gates:      1338
+    Gate breakdown:   {'cx': 780, 'rz': 455, 'rx': 65, 'h': 13, 'measure': 13, 'barrier': 12}
+
+  QAOA p=8:
+    Raw depth:        202
+    Transpiled depth: 570
+    CX gates:         1248
+    Total gates:      2124
+    Gate breakdown:   {'cx': 1248, 'rz': 728, 'rx': 104, 'barrier': 18, 'h': 13, 'measure': 13}
+
+────────────────────────────────────────────────────────────
+STEP 4: PATH B — CVaR-QAOA VARIATIONAL OPTIMIZATION
+────────────────────────────────────────────────────────────
+
+  ┌────────────────────────────────────────────────────┐
+  │  FIXES APPLIED (vs previous run):                  │
+  │  [1] CVaR_0.10 objective (was full ⟨H⟩)            │
+  │  [2] Dual extraction: max-prob + min-energy        │
+  │  [3] Powell optimizer × 2000 iter (was COBYLA×500) │
+  │  [4] 50 multi-start + INTERP warm-start chain     │
+  │  [5] Standard ⟨H⟩ reported separately from CVaR   │
+  │  [6] P(ground state) tracked explicitly            │
+  │  [7] Extended sweep: p=1,2,3,5,8                   │
+  └────────────────────────────────────────────────────┘
+
+  Landscape: 78 fully-connected couplings
+  Energy gap to first excited: ~7.24×10⁻⁵
+  Hilbert space: 2^13 = 8192 states
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  QAOA p=1  |  CVaR α=0.10  |  Powell×50  |  max_iter=2000
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Precomputing cost diagonal & mixer indices...
+    Precompute done in 0.53s
+    Cost diagonal verification: E[gs_idx]=-0.61562627 (expected -0.61562627) ✓
+    Restarts completed: 50/50
+    CVaR range: [-0.60146029, -0.58156650]
+    Total evaluations: 7836
+
+    ┌─ ENERGY ──────────────────────────────────────┐
+    │  CVaR objective:    -0.60146029  (optimizer target)    │
+    │  ⟨H⟩ expectation:   -0.47860681  (physical energy)    │
+    │  Exact ground:      -0.61562627  (Path A reference)   │
+    │  ⟨H⟩ error:         1.370195e-01                    │
+    │  Approx ratio:      0.777431                         │
+    └──────────────────────────────────────────────┘
+
+    ┌─ PROBABILITY ────────────────────────────────┐
+    │  P(ground state):   0.000398  (vs uniform 0.000122)  │
+    │  Enhancement:       3.3× uniform                   │
+    │  P(bottom 1%):      0.0361  (concentration metric)  │
+    └──────────────────────────────────────────────┘
+
+    ┌─ SOLUTION EXTRACTION ─────────────────────────┐
+    │  By max probability:                           │
+    │    Portfolio: ('NVDA', 'JNJ', 'BRK-B')                 │
+    │    E=-0.61356724  p=0.000592         ✗     │
+    │                                                │
+    │  By min energy (top-100):  [FIX-2]             │
+    │    Portfolio: ('NVDA', 'JNJ', 'BRK-B')                 │
+    │    E=-0.61390710  p=0.000590         ✗     │
+    │                                                │
+    │  Global min-E (any p>0):                       │
+    │    Portfolio: ('NVDA', 'JNJ', 'PG', 'JPM')             │
+    │    E=-0.61562627  p=0.000398  ✓ TARGET     │
+    └──────────────────────────────────────────────┘
+
+    Top-5 by probability:
+      #1: ('NVDA', 'JNJ', 'BRK-B')                   E=-0.61356724  p=0.000592  k=3  
+      #2: ('NVDA', 'JNJ', 'BRK-B')                   E=-0.61381073  p=0.000591  k=3  
+      #3: ('NVDA', 'JNJ', 'BRK-B')                   E=-0.61317663  p=0.000591  k=3  
+      #4: ('NVDA', 'JNJ', 'BRK-B')                   E=-0.61390710  p=0.000590  k=3  
+      #5: ('NVDA', 'JNJ', 'BRK-B')                   E=-0.61263890  p=0.000588  k=3  
+
+    Optimization time: 9.9s
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  QAOA p=2  |  CVaR α=0.10  |  Powell×50  |  max_iter=2000
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Warm-starting from p=1 (INTERP interpolation)
+    Restarts completed: 50/50
+    CVaR range: [-0.61036958, -0.55156683]
+    Total evaluations: 24447
+
+    ┌─ ENERGY ──────────────────────────────────────┐
+    │  CVaR objective:    -0.61036958  (optimizer target)    │
+    │  ⟨H⟩ expectation:   -0.49192900  (physical energy)    │
+    │  Exact ground:      -0.61562627  (Path A reference)   │
+    │  ⟨H⟩ error:         1.236973e-01                    │
+    │  Approx ratio:      0.799071                         │
+    └──────────────────────────────────────────────┘
+
+    ┌─ PROBABILITY ────────────────────────────────┐
+    │  P(ground state):   0.001232  (vs uniform 0.000122)  │
+    │  Enhancement:       10.1× uniform                   │
+    │  P(bottom 1%):      0.0943  (concentration metric)  │
+    └──────────────────────────────────────────────┘
+
+    ┌─ SOLUTION EXTRACTION ─────────────────────────┐
+    │  By max probability:                           │
+    │    Portfolio: ('JNJ', 'JPM', 'BRK-B')                  │
+    │    E=-0.57975779  p=0.001396         ✗     │
+    │                                                │
+    │  By min energy (top-100):  [FIX-2]             │
+    │    Portfolio: ('NVDA', 'JNJ', 'PG', 'JPM')             │
+    │    E=-0.61562627  p=0.001232  ✓ TARGET     │
+    │                                                │
+    │  Global min-E (any p>0):                       │
+    │    Portfolio: ('NVDA', 'JNJ', 'PG', 'JPM')             │
+    │    E=-0.61562627  p=0.001232  ✓ TARGET     │
+    └──────────────────────────────────────────────┘
+
+    Top-5 by probability:
+      #1: ('JNJ', 'JPM', 'BRK-B')                    E=-0.57975779  p=0.001396  k=3  
+      #2: ('NVDA', 'XOM', 'JNJ', 'BRK-B')            E=-0.60775832  p=0.001392  k=4  
+      #3: ('NVDA', 'XOM', 'JNJ', 'BRK-B')            E=-0.60829358  p=0.001381  k=4  
+      #4: ('NVDA', 'JNJ', 'PG', 'BRK-B')             E=-0.61214851  p=0.001381  k=4  
+      #5: ('JNJ', 'JPM', 'BRK-B')                    E=-0.58038313  p=0.001375  k=3  
+
+    Optimization time: 53.4s
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  QAOA p=3  |  CVaR α=0.10  |  Powell×50  |  max_iter=2000
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Warm-starting from p=2 (INTERP interpolation)
